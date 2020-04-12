@@ -1,6 +1,15 @@
-use actix_web::{get, post, App, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpServer, Responder};
 use lettre::{ClientSecurity, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct RequestBody {
+    to: String,
+    from: String,
+    subject: String,
+    html: String
+}
 
 #[get("/health")]
 async fn health() -> impl Responder {
@@ -8,12 +17,12 @@ async fn health() -> impl Responder {
 }
 
 #[post("/api/v1/send")]
-async fn send() -> impl Responder {
+async fn send(body: web::Json<RequestBody>) -> impl Responder {
     let email = EmailBuilder::new()
-        .to(("paleking@hallow.nest", "Pale King"))
-        .from("theknight@example.com")
-        .subject("Example email")
-        .html("We got html support")
+        .to(body.to.clone())
+        .from(body.from.clone())
+        .subject(body.subject.clone())
+        .html(body.html.clone())
         .build()
         .unwrap();
 
