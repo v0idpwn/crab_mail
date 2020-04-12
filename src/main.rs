@@ -63,7 +63,7 @@ async fn send(body: web::Json<RequestBody>) -> HttpResponse {
 async fn main() -> std::io::Result<()> {
     env_logger::init();
     HttpServer::new(|| App::new().service(health).service(send).wrap(Logger::default()))
-        .bind("127.0.0.1:8080")?
+        .bind("0.0.0.0:8080")?
         .run()
         .await
 }

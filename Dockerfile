@@ -2,29 +2,15 @@
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:latest as cargo-build
-
-RUN apt-get update
-
-RUN apt-get install musl-tools -y
+FROM ekidd/rust-musl-builder:latest as cargo-build
 
 RUN rustup target add x86_64-unknown-linux-musl
 
 WORKDIR /usr/src/crab_mail
 
-COPY Cargo.toml Cargo.toml
+ADD --chown=rust:rust . ./
 
-RUN mkdir src/
-
-RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
-
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/crab_mail*
-
-COPY . .
-
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
+RUN cargo build --release
 
 # ------------------------------------------------------------------------------
 # Final Stage

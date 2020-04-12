@@ -1,6 +1,6 @@
 [package]
 name = "crab_mail"
-version = "0.1.0"
+version = "0.1.4"
 authors = ["v0idpwn <v0idpwn@gmail.com>"]
 edition = "2018"
 
