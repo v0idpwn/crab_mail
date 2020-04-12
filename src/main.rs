@@ -1,7 +1,9 @@
 use actix_web::{get, post, web, App, HttpServer, HttpResponse, Responder};
+use actix_web::middleware::Logger;
 use lettre::{ClientSecurity, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use serde::{Serialize, Deserialize};
+use std::env;
 
 #[derive(Deserialize)]
 struct RequestBody {
@@ -31,7 +33,11 @@ async fn send(body: web::Json<RequestBody>) -> HttpResponse {
         .html(body.html.clone())
         .build();
 
-    let mut mailer = SmtpClient::new(("localhost", 1025), ClientSecurity::None)
+    let host = env::var("SMTP_HOST").expect("SMTP_HOST environment is mandatory");
+    let port : u16 = env::var("SMTP_PORT").expect("SMTP_PORT environment is mandatory")
+                    .parse::<u16>().expect("SMTP_PORT must be a number");
+
+    let mut mailer = SmtpClient::new((host.as_str(), port), ClientSecurity::None)
         .unwrap()
         .smtp_utf8(true)
         .transport();
@@ -55,7 +61,8 @@ async fn send(body: web::Json<RequestBody>) -> HttpResponse {
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(health).service(send))
+    env_logger::init();
+    HttpServer::new(|| App::new().service(health).service(send).wrap(Logger::default()))
         .bind("127.0.0.1:8080")?
         .run()
         .await
