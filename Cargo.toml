@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 actix-web = "2"
 actix-rt = "1"
+serde = "1"
+lettre = "0.9"
+lettre_email = "0.9"
